@@ -6,7 +6,7 @@ import math
 import numpy as np
 import glob
 from skimage.metrics import structural_similarity as compare_ssim
-from compressors import huffman  
+from compressors import huffman, lzw 
 
 # global variables
 selected_image_path = None
@@ -107,7 +107,7 @@ def open_image():
         image_label.config(image=photo)
         image_label.image = photo
         info_label.config(text=f"Selected image: {os.path.basename(file_path)}")
-        test_images_combo.set('')  # reset combobox selection
+        test_images_combo.set('')
 
 # compress image and show results
 def compress_image():
@@ -128,19 +128,23 @@ def compress_image():
         if algorithm == "Huffman":
             huffman.compress(selected_image_path, compressed_path)
             huffman.decompress(compressed_path, reconstructed_path)
-
-            original_img = Image.open(selected_image_path).convert("RGB")
-            reconstructed_img = Image.open(reconstructed_path).convert("RGB")
-
-            comp_rate = calculate_compression_rate(selected_image_path, compressed_path)
-            psnr = calculate_psnr(original_img, reconstructed_img)
-            ssim = calculate_ssim(original_img, reconstructed_img)
-
-            show_results_window(original_img, reconstructed_img, comp_rate, psnr, ssim, compressed_path, reconstructed_path)
-
-            result_text.set("Compression and analysis completed.\nSee results in new window.")
+        elif algorithm == "LZW":
+            lzw.compress(selected_image_path, compressed_path)
+            lzw.decompress(compressed_path, reconstructed_path)
         else:
             result_text.set("This algorithm is not implemented yet.")
+            return
+
+        original_img = Image.open(selected_image_path).convert("RGB")
+        reconstructed_img = Image.open(reconstructed_path).convert("RGB")
+
+        comp_rate = calculate_compression_rate(selected_image_path, compressed_path)
+        psnr = calculate_psnr(original_img, reconstructed_img)
+        ssim = calculate_ssim(original_img, reconstructed_img)
+
+        show_results_window(original_img, reconstructed_img, comp_rate, psnr, ssim, compressed_path, reconstructed_path)
+
+        result_text.set("Compression and analysis completed.\nSee results in new window.")
     except Exception as e:
         result_text.set(f"Error: {e}")
 
@@ -167,7 +171,7 @@ info_label.pack()
 
 tk.Label(root, text="Select an algorithm:").pack(pady=(10, 0))
 algo_menu = ttk.Combobox(root, textvariable=selected_algorithm, state="readonly")
-algo_menu['values'] = ["Huffman"]
+algo_menu['values'] = ["Huffman", "LZW"]
 algo_menu.pack()
 
 tk.Button(root, text="Compress", command=compress_image).pack(pady=10)
