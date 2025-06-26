@@ -6,7 +6,7 @@ import math
 import numpy as np
 import glob
 from skimage.metrics import structural_similarity as compare_ssim
-from compressors import huffman, lzw, jpeg
+from compressors import huffman, lzw, jpeg, jpeg2000
 
 # global variables
 selected_image_path = None
@@ -134,6 +134,9 @@ def compress_image():
         elif algorithm == 'JPEG':
             jpeg.compress(selected_image_path, compressed_path)
             jpeg.decompress(compressed_path, reconstructed_path)
+        elif algorithm == 'JPEG 2000':
+            jpeg.compress(selected_image_path, compressed_path)
+            jpeg.decompress(compressed_path, reconstructed_path)
         else:
             result_text.set("This algorithm is not implemented yet.")
             return
@@ -174,7 +177,7 @@ info_label.pack()
 
 tk.Label(root, text="Select an algorithm:").pack(pady=(10, 0))
 algo_menu = ttk.Combobox(root, textvariable=selected_algorithm, state="readonly")
-algo_menu['values'] = ["Huffman", "LZW", "JPEG"]
+algo_menu['values'] = ["Huffman", "LZW", "JPEG", "JPEG 2000"]
 algo_menu.pack()
 
 tk.Button(root, text="Compress", command=compress_image).pack(pady=10)
