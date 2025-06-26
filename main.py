@@ -121,8 +121,8 @@ def compress_image():
 
     try:
         filename = os.path.splitext(os.path.basename(selected_image_path))[0]
-        compressed_path = f"results/{filename}_{algorithm.lower()}.bin"
-        reconstructed_path = f"results/{filename}_{algorithm.lower()}_reconstructed.png"
+        compressed_path = f"results/{filename}_{algorithm.lower().replace(' ', '')}.bin"
+        reconstructed_path = f"results/{filename}_{algorithm.lower().replace(' ', '')}_reconstructed.png"
         os.makedirs("results", exist_ok=True)
 
         if algorithm == "Huffman":
@@ -135,8 +135,9 @@ def compress_image():
             jpeg.compress(selected_image_path, compressed_path)
             jpeg.decompress(compressed_path, reconstructed_path)
         elif algorithm == 'JPEG 2000':
-            jpeg.compress(selected_image_path, compressed_path)
-            jpeg.decompress(compressed_path, reconstructed_path)
+            ratio = selected_compression_ratio.get()
+            jpeg2000.compress(selected_image_path, compressed_path, compression_ratio=ratio)
+            jpeg2000.decompress(compressed_path, reconstructed_path)
         else:
             result_text.set("This algorithm is not implemented yet.")
             return
@@ -154,12 +155,13 @@ def compress_image():
     except Exception as e:
         result_text.set(f"Error: {e}")
 
-# gui
+# gui setup
 root = tk.Tk()
 root.title("Image Compression App")
 root.geometry("800x650")
 
 selected_algorithm = tk.StringVar()
+selected_compression_ratio = tk.IntVar(value=10)  # default compression ratio
 
 tk.Label(root, text="Select an image from test_images folder:").pack(pady=(10, 0))
 test_images_combo = ttk.Combobox(root, state="readonly")
@@ -177,8 +179,27 @@ info_label.pack()
 
 tk.Label(root, text="Select an algorithm:").pack(pady=(10, 0))
 algo_menu = ttk.Combobox(root, textvariable=selected_algorithm, state="readonly")
-algo_menu['values'] = ["Huffman", "LZW", "JPEG", "JPEG 2000"]
 algo_menu.pack()
+
+ratio_label = tk.Label(root, text="Select Compression Ratio (only for JPEG 2000):")
+ratio_combo = ttk.Combobox(root, textvariable=selected_compression_ratio, state="readonly")
+ratio_combo['values'] = [5, 10, 20, 50]
+ratio_combo.current(1)  # default to 10
+
+# hide ratio controls initially
+ratio_label.pack_forget()
+ratio_combo.pack_forget()
+
+def on_algorithm_change(event=None):
+    algo = selected_algorithm.get()
+    if algo == "JPEG 2000":
+        ratio_label.pack(pady=(10, 0))
+        ratio_combo.pack()
+    else:
+        ratio_label.pack_forget()
+        ratio_combo.pack_forget()
+
+selected_algorithm.trace_add('write', lambda *args: on_algorithm_change())
 
 tk.Button(root, text="Compress", command=compress_image).pack(pady=10)
 

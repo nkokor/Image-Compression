@@ -1,15 +1,13 @@
 from PIL import Image
 import numpy as np
 import glymur
-import os
 
-def compress(input_image_path, output_path):
+def compress(input_image_path, output_path, compression_ratio=10):
     image = Image.open(input_image_path).convert("RGB")
     image_np = np.array(image)
 
-    # glymur expects data in shape (height, width, channels)
-    glymur.Jp2k(output_path, data=image_np)
-
+    # lossy compression with selected compression ratio
+    glymur.Jp2k(output_path, data=image_np, cratios=[compression_ratio])
 
 def decompress(input_path, output_image_path):
     jp2 = glymur.Jp2k(input_path)
