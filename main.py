@@ -12,7 +12,6 @@ from compressors import huffman, lzw, deflate, jpeg, jpeg2000
 
 from metrics import calculate_compression_rate, calculate_psnr, calculate_ssim
 
-
 selected_image_path = None
 selected_test_image = None
 
@@ -103,7 +102,8 @@ def compress_image():
             deflate.compress(selected_image_path, compressed_path)
             deflate.decompress(compressed_path, reconstructed_path)
         elif algorithm == "JPEG":
-            jpeg.compress(selected_image_path, compressed_path)
+            quality = selected_jpeg_quality.get()
+            jpeg.compress(selected_image_path, compressed_path, quality=quality)
             jpeg.decompress(compressed_path, reconstructed_path)
         elif algorithm == "JPEG 2000":
             ratio = selected_compression_ratio.get()
@@ -128,6 +128,7 @@ app.geometry("900x700")
 
 selected_algorithm = tk.StringVar()
 selected_compression_ratio = tk.IntVar(value=10)
+selected_jpeg_quality = tk.IntVar(value=75)
 
 main_frame = ttk.Frame(app, padding=20)
 main_frame.pack(fill="both", expand=True)
@@ -168,14 +169,30 @@ ratio_combo.current(1)
 ratio_label.pack_forget()
 ratio_combo.pack_forget()
 
+jpeg_quality_label = ttk.Label(algorithm_frame, text="JPEG Quality:")
+jpeg_quality_combo = ttk.Combobox(algorithm_frame, textvariable=selected_jpeg_quality, state="readonly")
+jpeg_quality_combo['values'] = [30, 50, 75, 90, 95, 100]
+jpeg_quality_combo.set(75)
+jpeg_quality_label.pack_forget()
+jpeg_quality_combo.pack_forget()
+
 def on_algorithm_change(event=None):
     algo = selected_algorithm.get()
     if algo == "JPEG 2000":
         ratio_label.pack(pady=(10, 0), anchor="w")
         ratio_combo.pack(fill="x")
+        jpeg_quality_label.pack_forget()
+        jpeg_quality_combo.pack_forget()
+    elif algo == "JPEG":
+        jpeg_quality_label.pack(pady=(10, 0), anchor="w")
+        jpeg_quality_combo.pack(fill="x")
+        ratio_label.pack_forget()
+        ratio_combo.pack_forget()
     else:
         ratio_label.pack_forget()
         ratio_combo.pack_forget()
+        jpeg_quality_label.pack_forget()
+        jpeg_quality_combo.pack_forget()
 
 selected_algorithm.trace_add('write', lambda *args: on_algorithm_change())
 
