@@ -10,28 +10,11 @@ from ttkbootstrap.constants import *
 
 from compressors import huffman, lzw, deflate, jpeg, jpeg2000
 
+from metrics import calculate_compression_rate, calculate_psnr, calculate_ssim
+
+
 selected_image_path = None
 selected_test_image = None
-
-def calculate_compression_rate(original_path, compressed_path):
-    original_size = os.path.getsize(original_path)
-    compressed_size = os.path.getsize(compressed_path)
-    return original_size / compressed_size if compressed_size != 0 else 0
-
-def calculate_psnr(original_img, reconstructed_img):
-    original = np.array(original_img).astype(np.float64)
-    reconstructed = np.array(reconstructed_img).astype(np.float64)
-    mse = np.mean((original - reconstructed) ** 2)
-    if mse == 0:
-        return float('inf')
-    PIXEL_MAX = 255.0
-    return 20 * math.log10(PIXEL_MAX / math.sqrt(mse))
-
-def calculate_ssim(original_img, reconstructed_img):
-    original = np.array(original_img.convert('L'))
-    reconstructed = np.array(reconstructed_img.convert('L'))
-    ssim, _ = compare_ssim(original, reconstructed, full=True)
-    return ssim
 
 def show_results_window(original_img, reconstructed_img, comp_rate, psnr, ssim, compressed_path, reconstructed_path):
     window = tk.Toplevel()
