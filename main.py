@@ -84,7 +84,7 @@ def show_results_window(original_img, reconstructed_img, comp_rate, psnr, ssim, 
     time_table.pack(pady=(0, 10))
 
 def get_test_images():
-    image_extensions = ('*.png', '*.jpg', '*.jpeg', '*.bmp', '*.tiff', '*.pgm')
+    image_extensions = ('*.png', '*.jpg', '*.jpeg', '*.bmp', '*.tiff', '*.pgm', '*.gif', '*webp')
     image_files = []
     for ext in image_extensions:
         image_files.extend(glob.glob(f"test_images/{ext}"))
